@@ -241,8 +241,9 @@ void mostrarCorreo()
         while (!Archivo.eof())
         {
             Archivo.read((char*) &Correo1, sizeof (Correo));
-            if (Archivo.eof())
-                break;
+            if (Archivo.eof()){
+            	break;
+			}
             if (Correo1.identificador != 0)
             {
                 cout << endl;
@@ -285,7 +286,6 @@ void buscarCorreo()
             if(Correo1.identificador != 0)
             {
                 imprimirCorreo();
-
             }
             else
             {
@@ -313,8 +313,9 @@ void buscarCorreo()
             {
                 Archivo.read((char*) &Correo1, sizeof (Correo));
 
-                if (Archivo.eof())
-                    break;
+                if (Archivo.eof()){
+                	break;
+				}
                 if (Correo1.remitente == remitente)
                 {
                     cout << "Correo encontrado: "<< endl;
@@ -380,8 +381,9 @@ void modificarCorreo()
         while (!Archivo.eof())
         {
             Archivo.read((char*) &Correo1, sizeof (Correo));
-            if (Archivo.eof())
-                break;
+            if (Archivo.eof()){
+            	break;
+			}
 
             if (Correo1.identificador != 0 and Correo1.identificador == id)
             {
@@ -440,8 +442,9 @@ void modificarCorreo()
             Archivo.read((char*) &Correo1, sizeof (Correo));
             z++;
 
-            if (Archivo.eof())
-                break;
+            if (Archivo.eof()){
+            	break;
+			}
             if (Correo1.remitente == remitente)
             {
                 imprimirCorreo();
@@ -585,8 +588,9 @@ void eliminarCorreo()
                 Archivo.read((char*) &Correo1, sizeof (Correo));
                 z++;
 
-                if (Archivo.eof())
-                    break;
+                if (Archivo.eof()){
+                	break;
+				}
                 if (Correo1.remitente == remitente)
                 {
                     imprimirCorreo();
@@ -635,8 +639,9 @@ void exportaraCsv()
     ifstream Archivo("Correos.txt", ios::in | ios::binary);
     string nombreArchivo;
     bool encontrado = false;
-    if (!Archivo.good())
-        cout << "Error al intentar abrir el archivo base para hacer la copia de seguridad." << endl;
+    if (!Archivo.good()){
+    	cout << "Error al intentar abrir el archivo base para hacer la copia de seguridad." << endl;
+	}     
     else
     {
         fflush(stdin);
@@ -651,8 +656,9 @@ void exportaraCsv()
         nombreArchivo = nombreArchivo+".csv";
 
         ofstream file(nombreArchivo.c_str(), ios::in | ios::trunc |ios::out);
-        if (!file.good())
-            cout << "El archivo para guardar la copia de seguridad no se puede abrir" << endl;
+        if (!file.good()){
+        	cout << "El archivo para guardar la copia de seguridad no se puede abrir" << endl;
+		}
         else
         {
             while (!Archivo.eof())
@@ -673,10 +679,12 @@ void exportaraCsv()
                 }
 
             }
-            if (encontrado == false)
-                cout << "No Hay elementos" << endl;
-            else
-                cout << "Archivo creado con exito" << endl;
+            if (encontrado == false){
+            	cout << "No Hay elementos" << endl;
+			}
+            else{
+            	cout << "Archivo creado con exito" << endl;
+			}
         }
         file.close();
     }
@@ -712,97 +720,90 @@ void mostrarArchivoSeguridad()
 		cout << datos_csv.at(i) << endl;
 	}
 }
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////  P  E  N  D  I  E  N  T  E  //////////////////////////////////////////////////////////////////////////////////
+
 void modificarArchivoSeguridad()
 {	
 	int idModificar;
-	fstream Temp;
-	fstream file;
-	string nombreArchivo;
-    char tempRemitente[20];
-    char tempDestinatario[30];
-    char tempCopiaCarbon[15];
-    char tempCopiaCarbonCiega[30];
-    char tempAsunto[50];
-    char tempContenido[500];
-    char tempFecha[20];
-    char tempHora[20];
 	bool encontrado = false;
-	cout << "Escriba el nombre del archivo que desea modificar: ";
-	cin.clear();
-	cin.ignore();
+	int idEliminar;
+	string nombreArchivo;
+	fflush(stdin);
+	cout << "Ingrese el nombre del archivo donde desea modificar un registro: ";
 	getline(cin,nombreArchivo);
-	Temp.open("temp.csv",ios::out | ios::in | ios::binary);
+	nombreArchivo = nombreArchivo + ".csv";
+	fstream Temp("temp.csv",ios::out | ios::in | ios::trunc);
 	fstream Archivo(nombreArchivo.c_str(), ios::in | ios::trunc | ios::out);
-	if(Archivo.fail()){
+	if(!Archivo.good()){
 		cerr << "Error al intentar abrir el archivo base para hacer la copia de seguridad." << endl;
 	}
-	else{
-		if(nombreArchivo == ""){
-			cout << "se ha presionado enter sin capturar ningun nombre para el archivo." << endl;
-			cout << "Se creara un archivo con el nombre 'seguridad.csv'" << endl;
-			nombreArchivo = "seguridad";
-		}
-		nombreArchivo = nombreArchivo+".csv";
-		
+	else
+	{
 		if(!Archivo.good()){
 			cout << "El archivo para guardar la copia de seguridad no se puede abrir" << endl;
 		}
 		else
 		{
-			cout << "Ingrese el ID asociado al registro a modificar: ";
+			cout << "Ingrese ID asociado a registro a modificar: ";
 			cin >> idModificar;
-			while(!Archivo.eof())
+			int buscar = (idModificar-1)*sizeof(Correo);
+            Archivo.seekg(buscar);
+            Archivo.read((char*)&Correo1,sizeof(Correo));
+			if(Correo1.identificador != 0)
 			{
-				Archivo.read((char *)&Correo1, sizeof(Correo));
-				if(Archivo.eof()){
-					break;
-				}
-				while(Correo1.identificador != idModificar)
-				{
-					encontrado = true;
-					
-				}
+				encontrado = true;
+				
+				Temp.write((char *)&Correo1, sizeof(Correo));
+				
+				cout << "Registro encontrado !! " << endl;
+				cout << "Ingrese nuevos datos: " << endl;
+				cout << "Remitente: " << endl;
+				cin.clear();
+				cin.ignore();
+			    cin.getline(Correo1.remitente, 20);
+			    cout << "Destinatario: " << endl;
+			    cin.getline(Correo1.destinatario, 30);
+			    cout << "CopiaCarbon: " << endl;
+			    cin.getline(Correo1.copiaCarbon, 15);
+			    cout << "CopiaCarbonCiega: " << endl;
+			    cin.getline(Correo1.copiaCarbonCiega, 30);
+			    cout << "Asunto: " << endl;
+			    cin.getline(Correo1.asunto, 50);
+			    cout << "Escriba '|' para teminar la entrada." << endl;
+			    cout << "Contenido del Correo: " << endl;
+			    cin.getline(Correo1.contenido, 500, '|');
+		    	
+				consiguehorayfecha();
+		    	consiguehorayfecha();
+				
+				Temp.write((char *)&Correo1, sizeof(Correo));
 			}
 			if(encontrado == false){
 				cout << "Elemento no encontrado" << endl;
 			}
-			else{
-				cout << "Archivo creado con exito" << endl;
-			}
 		}
-		nombreArchivo + ".csv";
-		remove(nombreArchivo.c_str());
-		rename("temp.csv", nombreArchivo.c_str());
-		
 		Temp.close();
 	}
 	Archivo.close();
+	remove(nombreArchivo.c_str());
+	rename("temp.csv", nombreArchivo.c_str());
 }
-////////////////////////////////////////////////////   P  E  N  D  I  E  N  T  E  /////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void eliminarArchivoSeguridad(){
-	string nombreArchivo;
+void eliminarArchivoSeguridad()
+{
 	int idEliminar;
+	string nombreArchivo;
 	bool encontrado = false;
 	fflush(stdin);
 	cout << "Ingrese el nombre del archivo donde desea eliminar un registro: ";
 	getline(cin,nombreArchivo);
-	fstream Temp("temp.csv",ios::out | ios::in | ios::binary);
+	nombreArchivo = nombreArchivo + ".csv";
+	fstream Temp("temp.csv",ios::out | ios::in | ios::trunc);
 	fstream Archivo(nombreArchivo.c_str(), ios::in | ios::trunc | ios::out);
 	if(!Archivo.good()){
 		cerr << "Error al intentar abrir el archivo base para hacer la copia de seguridad." << endl;
 	}
-	else{
-		if(nombreArchivo == ""){
-			cout << "se ha presionado enter sin capturar ningun nombre para el archivo." << endl;
-			cout << "Se creara un archivo con el nombre 'seguridad.csv'" << endl;
-			nombreArchivo = "seguridad";
-		}
-		nombreArchivo = nombreArchivo+".csv";
-		
+	else
+	{
 		if(!Archivo.good()){
 			cout << "El archivo para guardar la copia de seguridad no se puede abrir" << endl;
 		}
@@ -810,33 +811,24 @@ void eliminarArchivoSeguridad(){
 		{
 			cout << "Ingrese ID asociado a registro a eliminar: ";
 			cin >> idEliminar;
-			while(Archivo.eof())
+			int buscar = (idEliminar-1)*sizeof(Correo);
+            Archivo.seekg(buscar);
+            Archivo.read((char*)&Correo1,sizeof(Correo));
+			if(Correo1.identificador != 0)
 			{
-				Archivo.read((char *)&Correo1, sizeof(Correo));
-				if(Archivo.eof()){
-					break;
-				}
-				while(Correo1.identificador != idEliminar)
-				{
-					encontrado = true;
-					Temp << Correo1.identificador << delimitador << Correo1.remitente << delimitador
-                         << Correo1.destinatario << delimitador << Correo1.copiaCarbon << delimitador
-                         << Correo1.copiaCarbonCiega << delimitador << Correo1.asunto << delimitador
-                         << Correo1.contenido << delimitador << Correo1.fechaCreacion.dia << delimitador
-                         << Correo1.fechaCreacion.mes << delimitador <<Correo1.fechaCreacion.anio << delimitador
-                         << Correo1.horaCreacion.hora << delimitador << Correo1.horaCreacion.minuto << finRegistro << endl;
-				}
+				encontrado = true;
+				Temp.write((char *)&Correo1, sizeof(Correo));
 			}
-			if(encontrado == false)
+			if(encontrado == false){
 				cout << "Elemento no encontrado" << endl;
-			else
-				cout << "Archivo creado con exito" << endl;
+			}
+			else{
+				cout << "Registro modificado exitosamente." << endl;
+			}
 		}
-		nombreArchivo + ".csv";
-		remove(nombreArchivo.c_str());
-		rename("temp.csv", nombreArchivo.c_str());
-		
 		Temp.close();
 	}
 	Archivo.close();
+	remove(nombreArchivo.c_str());
+	rename("temp.csv", nombreArchivo.c_str());
 }
