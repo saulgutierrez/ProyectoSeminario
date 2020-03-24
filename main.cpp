@@ -57,8 +57,11 @@ void mostrarArchivoSeguridad();
 void modificarArchivoSeguridad();
 void eliminarArchivoSeguridad();
 void consiguehorayfecha();
+void imprimirInformacion();
 
 Correo Correo1;
+Fecha fecha;
+Hora hora;
 
 int main()
 {
@@ -693,32 +696,97 @@ void exportaraCsv()
 
 void mostrarArchivoSeguridad()
 {
-	string nombreArchivo;
-    fflush(stdin);
-    cout << "Ingresa el Nombre del archivo que desea leer :" << endl;
-    getline(cin, nombreArchivo);
-    if (nombreArchivo == "")
-    {
-        cout << "Se ha presionado enter sin capturar ningun nombre para el archivo." << endl;
-        cout << "Se intentara leer un archivo con el nombre 'seguridad.csv'" << endl;
-        nombreArchivo = "seguridad";
-    }
-    nombreArchivo = nombreArchivo+".csv";
-    ifstream Archivo(nombreArchivo.c_str());
-    string line = "";
-    vector <string> datos_csv;
-    while(getline(Archivo,line)){
-    	stringstream strstr(line);
-    	string word = "";
-    	while(getline(strstr,word, ';')){
-    		datos_csv.push_back(word);
+	ifstream Archivo("copiaSeguridad.csv");
+	char tempIdentificador[10];
+	char tempRemitente[20];
+	char tempDestinatario[30];
+	char tempCopiaCarbon[15];
+	char tempCopiaCarbonCiega[30];
+	char tempAsunto[50];
+	char tempContenido[500];
+	char tempDia[5];
+	char tempMes[5];
+	char tempAnio[5];
+	char tempHora[5];
+	char tempMinuto[5];
+	bool elementos = false;
+	
+	if(Archivo.fail()){
+		cout << "No existe tal archivo, o ha sido movido de la carpeta del .csv" << endl;
+	}
+	else
+	{
+		while(!Archivo.eof())
+		{
+			if(Archivo.eof()){
+				break;
+			}
+			
+			Archivo.getline(tempIdentificador, 10, ';');
+			Correo1.identificador = atoi(tempIdentificador);
+			
+			Archivo.getline(tempRemitente, 20, ';');
+			strcpy(Correo1.remitente, tempRemitente);
+			
+			Archivo.getline(tempDestinatario, 30, ';');
+			strcpy(Correo1.destinatario, tempDestinatario);
+			
+			Archivo.getline(tempCopiaCarbon, 15, ';');
+			strcpy(Correo1.copiaCarbon, tempCopiaCarbon);
+			
+			Archivo.getline(tempCopiaCarbonCiega, 30, ';');
+			strcpy(Correo1.copiaCarbonCiega, tempCopiaCarbonCiega);
+			
+			Archivo.getline(tempAsunto, 50, ';');
+			strcpy(Correo1.asunto, tempAsunto);
+			
+			Archivo.getline(tempContenido, 500, ';');
+			strcpy(Correo1.contenido, tempContenido);
+			
+			Archivo.getline(tempDia, 5, ';');
+			fecha.dia = atoi(tempDia);
+			
+			Archivo.getline(tempMes, 5, ';');
+			fecha.mes = atoi(tempMes);
+			
+			Archivo.getline(tempAnio, 5, ';');
+			fecha.anio = atoi(tempAnio);
+			
+			Archivo.getline(tempHora, 5, ';');
+			hora.hora = atoi(tempHora);
+			
+			Archivo.getline(tempMinuto, 5, ';');
+			hora.minuto = atoi(tempMinuto);
+						
+			if(Correo1.identificador != 0)
+			{
+				imprimirInformacion();
+				elementos = true;
+			}
 		}
 	}
-	cout << "Elemento encontrado" << endl;
-	cout << "Mostrando..." << endl;
-	for(int i = 0; i < datos_csv.size(); i++){
-		cout << datos_csv.at(i) << endl;
-	}
+	if(elementos == false)
+		cout << "No hay elementos" << endl;
+		
+	Archivo.close();
+}
+
+void imprimirInformacion()
+{
+	system("CLS");
+	cout << "Mostrando archivo de seguridad..." << endl;
+	cout << "Identificador: " << Correo1.identificador << endl;
+	cout << "Remitente: " << Correo1.remitente << endl;
+	cout << "Destinatario: " << Correo1.destinatario << endl;
+	cout << "Copia Carbon: " << Correo1.copiaCarbon << endl;
+	cout << "Copia Carbon Ciega: " << Correo1.copiaCarbonCiega << endl;
+	cout << "Asunto: " << Correo1.asunto << endl;
+	cout << "Contenido: " << Correo1.contenido << endl;
+	cout << "Dia: " << fecha.dia << endl;
+	cout << "Mes: " << fecha.mes << endl;
+	cout << "Anio: " << fecha.anio << endl;
+	cout << "Hora: " << hora.hora << endl;
+	cout << "Minuto: " << hora.minuto << endl;
 }
 
 void modificarArchivoSeguridad()
@@ -745,14 +813,12 @@ void modificarArchivoSeguridad()
 		{
 			cout << "Ingrese ID asociado a registro a modificar: ";
 			cin >> idModificar;
-			int buscar = (idModificar-1)*sizeof(Correo);
+			int buscar = ((idModificar-1)*sizeof(Correo));
             Archivo.seekg(buscar);
             Archivo.read((char*)&Correo1,sizeof(Correo));
 			if(Correo1.identificador != 0)
 			{
 				encontrado = true;
-				
-				Temp.write((char *)&Correo1, sizeof(Correo));
 				
 				cout << "Registro encontrado !! " << endl;
 				cout << "Ingrese nuevos datos: " << endl;
@@ -771,11 +837,19 @@ void modificarArchivoSeguridad()
 			    cout << "Escriba '|' para teminar la entrada." << endl;
 			    cout << "Contenido del Correo: " << endl;
 			    cin.getline(Correo1.contenido, 500, '|');
-		    	
-				consiguehorayfecha();
+			    
+			    consiguehorayfecha();
 		    	consiguehorayfecha();
-				
-				Temp.write((char *)&Correo1, sizeof(Correo));
+			    
+			    Temp.seekp((idModificar - 1)*sizeof(Correo1), ios::beg);
+				Temp << Correo1.identificador << ';' << Correo1.remitente << ';'
+                    	<< Correo1.destinatario << ';' << Correo1.copiaCarbon << ';'
+                        << Correo1.copiaCarbonCiega << ';' << Correo1.asunto << ';'
+                        << Correo1.contenido << ';' << Correo1.fechaCreacion.dia << ';'
+                        << Correo1.fechaCreacion.mes << ';' << Correo1.fechaCreacion.anio << ';'
+                        << Correo1.horaCreacion.hora << ';' << Correo1.horaCreacion.minuto << '|' << endl;
+                        
+                cout << endl << "Registro modificado exitosamente." << endl;
 			}
 			if(encontrado == false){
 				cout << "Elemento no encontrado" << endl;
@@ -811,13 +885,14 @@ void eliminarArchivoSeguridad()
 		{
 			cout << "Ingrese ID asociado a registro a eliminar: ";
 			cin >> idEliminar;
-			int buscar = (idEliminar-1)*sizeof(Correo);
+			int buscar = ((idEliminar-1)*sizeof(Correo));
             Archivo.seekg(buscar);
             Archivo.read((char*)&Correo1,sizeof(Correo));
 			if(Correo1.identificador != 0)
 			{
 				encontrado = true;
-				Temp.write((char *)&Correo1, sizeof(Correo));
+				Correo1.identificador = 0;
+				Archivo.write((char *)&Correo1, sizeof(Correo));
 			}
 			if(encontrado == false){
 				cout << "Elemento no encontrado" << endl;
