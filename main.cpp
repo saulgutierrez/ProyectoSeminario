@@ -7,6 +7,7 @@
 #include <time.h>
 #include <vector>
 #include <ctime>
+#include <cstring>
 
 #define delimitador ';'
 #define finRegistro '|'
@@ -274,7 +275,7 @@ void buscarCorreo()
     cout << "Seleccione opcion: ";
     cin >> opc;
     cin.clear();
-    
+
     if(opc==1)
     {
         ifstream Archivo("Correos.txt", ios::in | ios::binary);
@@ -644,7 +645,7 @@ void exportaraCsv()
     bool encontrado = false;
     if (!Archivo.good()){
     	cout << "Error al intentar abrir el archivo base para hacer la copia de seguridad." << endl;
-	}     
+	}
     else
     {
         fflush(stdin);
@@ -678,7 +679,8 @@ void exportaraCsv()
                          << Correo1.copiaCarbonCiega << delimitador << Correo1.asunto << delimitador
                          << Correo1.contenido << delimitador << Correo1.fechaCreacion.dia << delimitador
                          << Correo1.fechaCreacion.mes << delimitador <<Correo1.fechaCreacion.anio << delimitador
-                         << Correo1.horaCreacion.hora << delimitador << Correo1.horaCreacion.minuto << finRegistro << endl;
+                         //<< Correo1.horaCreacion.hora << delimitador << Correo1.horaCreacion.minuto << finRegistro << endl;
+                         << Correo1.horaCreacion.hora << delimitador << Correo1.horaCreacion.minuto << delimitador << endl;
                 }
 
             }
@@ -696,9 +698,10 @@ void exportaraCsv()
 
 void mostrarArchivoSeguridad()
 {
-	ifstream Archivo("copiaSeguridad.csv");
+	ifstream Archivo("seguridad.csv");
 	char tempIdentificador[10];
-	char tempRemitente[20];
+	std::string temp;
+	char tempRemitente;
 	char tempDestinatario[30];
 	char tempCopiaCarbon[15];
 	char tempCopiaCarbonCiega[30];
@@ -710,54 +713,121 @@ void mostrarArchivoSeguridad()
 	char tempHora[5];
 	char tempMinuto[5];
 	bool elementos = false;
-	
+
 	if(Archivo.fail()){
 		cout << "No existe tal archivo, o ha sido movido de la carpeta del .csv" << endl;
 	}
 	else
 	{
+	    cout << "Mostrando archvo de seguridad: " << endl;
 		while(!Archivo.eof())
 		{
+
+			getline(Archivo, temp, ';');
 			if(Archivo.eof()){
 				break;
 			}
-			
-			Archivo.getline(tempIdentificador, 10, ';');
-			Correo1.identificador = atoi(tempIdentificador);
-			
-			Archivo.getline(tempRemitente, 20, ';');
-			strcpy(Correo1.remitente, tempRemitente);
-			
-			Archivo.getline(tempDestinatario, 30, ';');
-			strcpy(Correo1.destinatario, tempDestinatario);
-			
-			Archivo.getline(tempCopiaCarbon, 15, ';');
-			strcpy(Correo1.copiaCarbon, tempCopiaCarbon);
-			
-			Archivo.getline(tempCopiaCarbonCiega, 30, ';');
-			strcpy(Correo1.copiaCarbonCiega, tempCopiaCarbonCiega);
-			
-			Archivo.getline(tempAsunto, 50, ';');
-			strcpy(Correo1.asunto, tempAsunto);
-			
-			Archivo.getline(tempContenido, 500, ';');
-			strcpy(Correo1.contenido, tempContenido);
-			
-			Archivo.getline(tempDia, 5, ';');
-			fecha.dia = atoi(tempDia);
-			
-			Archivo.getline(tempMes, 5, ';');
-			fecha.mes = atoi(tempMes);
-			
-			Archivo.getline(tempAnio, 5, ';');
-			fecha.anio = atoi(tempAnio);
-			
-			Archivo.getline(tempHora, 5, ';');
-			hora.hora = atoi(tempHora);
-			
-			Archivo.getline(tempMinuto, 5, ';');
-			hora.minuto = atoi(tempMinuto);
-						
+			//Correo1.identificador = atoi(tempIdentificador);
+			Correo1.identificador = stoi(temp);
+			//std::cout << "estructura id: " << Correo1.identificador << endl;
+
+			getline(Archivo, temp, ';');
+
+			int n = temp.length();
+			char a[n+1];
+			strcpy(a, temp.c_str());
+			strcpy(Correo1.remitente, a);
+			//std::cout << "Remitenteeeee: " << Correo1.remitente << "\n";
+
+			getline(Archivo, temp, ';');
+			strcpy(a, temp.c_str());
+			strcpy(Correo1.destinatario, a);
+			//std::cout << "destinatario: " << Correo1.destinatario<< "\n";
+
+			getline(Archivo, temp, ';');
+			strcpy(a, temp.c_str());
+			strcpy(Correo1.copiaCarbon, a);
+			//std::cout << "copia carbon: " << Correo1.copiaCarbon<< "\n";
+			getline(Archivo, temp, ';');
+
+			strcpy(a, temp.c_str());
+			strcpy(Correo1.copiaCarbonCiega, a);
+			//std::cout << "copiaCarbonCiega: " << Correo1.copiaCarbonCiega<< "\n";
+
+			getline(Archivo, temp, ';');
+			strcpy(a, temp.c_str());
+			strcpy(Correo1.asunto, a);
+			//std::cout << "asunto: " << Correo1.asunto << "\n";
+
+			getline(Archivo, temp, ';');
+			strcpy(a, temp.c_str());
+			strcpy(Correo1.contenido, a);
+			//std::cout << "contenido: " << Correo1.contenido << "\n";
+
+			getline(Archivo, temp, ';');
+			fecha.dia = stoi(temp);
+			//std::cout << "dia: " << fecha.dia << "\n";
+
+			getline(Archivo, temp, ';');
+			fecha.mes = stoi(temp);
+			//std::cout << "mes: " << fecha.mes<< "\n";
+
+			getline(Archivo, temp, ';');
+			fecha.anio= stoi(temp);
+			//std::cout << "anio: " << fecha.anio<< "\n";
+
+			getline(Archivo, temp, ';');
+			hora.hora= stoi(temp);
+			//std::cout << "hora: " << hora.hora<< "\n";
+
+			getline(Archivo, temp, ';');
+			hora.minuto= stoi(temp);
+			//std::cout << "minuto: " << hora.minuto<< "\n";
+
+			//getline(Archivo, temp, ';');
+			//strcpy(a, temp.c_str());
+			//strcpy(Correo1.remitente, a);
+			//std::cout << "Remitenteeeee: " << Correo1.remitente << "\n";
+			//strcpy(a, temp.c_str());
+			//strcpy(Correo1.remitente, a);
+			//std::cout << "Remitenteeeee: " << Correo1.remitente << "\n";
+
+
+
+			//strcpy(Correo1.remitente, tempRemitente);
+			//Archivo.getline(tempRemitente, 20, ';');
+			//strcpy(Correo1.remitente, tempRemitente);
+
+			//Archivo.getline(tempDestinatario, 30, ';');
+			//strcpy(Correo1.destinatario, tempDestinatario);
+
+			//Archivo.getline(tempCopiaCarbon, 15, ';');
+			//strcpy(Correo1.copiaCarbon, tempCopiaCarbon);
+
+			//Archivo.getline(tempCopiaCarbonCiega, 30, ';');
+			//strcpy(Correo1.copiaCarbonCiega, tempCopiaCarbonCiega);
+
+			//Archivo.getline(tempAsunto, 50, ';');
+			//strcpy(Correo1.asunto, tempAsunto);
+
+			//Archivo.getline(tempContenido, 500, ';');
+			//strcpy(Correo1.contenido, tempContenido);
+
+			//Archivo.getline(tempDia, 5, ';');
+			//fecha.dia = atoi(tempDia);
+
+			//Archivo.getline(tempMes, 5, ';');
+			//fecha.mes = atoi(tempMes);
+
+			//Archivo.getline(tempAnio, 5, ';');
+			//fecha.anio = atoi(tempAnio);
+
+			//Archivo.getline(tempHora, 5, ';');
+			//hora.hora = atoi(tempHora);
+
+			//Archivo.getline(tempMinuto, 5, ';');
+			//hora.minuto = atoi(tempMinuto);
+
 			if(Correo1.identificador != 0)
 			{
 				imprimirInformacion();
@@ -767,14 +837,12 @@ void mostrarArchivoSeguridad()
 	}
 	if(elementos == false)
 		cout << "No hay elementos" << endl;
-		
+
 	Archivo.close();
 }
 
 void imprimirInformacion()
 {
-	system("CLS");
-	cout << "Mostrando archivo de seguridad..." << endl;
 	cout << "Identificador: " << Correo1.identificador << endl;
 	cout << "Remitente: " << Correo1.remitente << endl;
 	cout << "Destinatario: " << Correo1.destinatario << endl;
@@ -787,20 +855,26 @@ void imprimirInformacion()
 	cout << "Anio: " << fecha.anio << endl;
 	cout << "Hora: " << hora.hora << endl;
 	cout << "Minuto: " << hora.minuto << endl;
+	cout << "\n";
 }
 
 void modificarArchivoSeguridad()
-{	
+{
 	int idModificar;
+	string ID, temp;
+
 	bool encontrado = false;
 	int idEliminar;
 	string nombreArchivo;
+	// UBNUTU
+	cin.ignore();
+	cin.clear();
 	fflush(stdin);
 	cout << "Ingrese el nombre del archivo donde desea modificar un registro: ";
 	getline(cin,nombreArchivo);
 	nombreArchivo = nombreArchivo + ".csv";
-	fstream Temp("temp.csv",ios::out | ios::in | ios::trunc);
-	fstream Archivo(nombreArchivo.c_str(), ios::in | ios::trunc | ios::out);
+	ofstream Temp("temp.csv",ios::out);
+	ifstream Archivo(nombreArchivo.c_str(), ios::in);
 	if(!Archivo.good()){
 		cerr << "Error al intentar abrir el archivo base para hacer la copia de seguridad." << endl;
 	}
@@ -813,47 +887,159 @@ void modificarArchivoSeguridad()
 		{
 			cout << "Ingrese ID asociado a registro a modificar: ";
 			cin >> idModificar;
-			int buscar = ((idModificar-1)*sizeof(Correo));
-            Archivo.seekg(buscar);
-            Archivo.read((char*)&Correo1,sizeof(Correo));
-			if(Correo1.identificador != 0)
-			{
-				encontrado = true;
-				
-				cout << "Registro encontrado !! " << endl;
-				cout << "Ingrese nuevos datos: " << endl;
-				cout << "Remitente: " << endl;
-				cin.clear();
-				cin.ignore();
-			    cin.getline(Correo1.remitente, 20);
-			    cout << "Destinatario: " << endl;
-			    cin.getline(Correo1.destinatario, 30);
-			    cout << "CopiaCarbon: " << endl;
-			    cin.getline(Correo1.copiaCarbon, 15);
-			    cout << "CopiaCarbonCiega: " << endl;
-			    cin.getline(Correo1.copiaCarbonCiega, 30);
-			    cout << "Asunto: " << endl;
-			    cin.getline(Correo1.asunto, 50);
-			    cout << "Escriba '|' para teminar la entrada." << endl;
-			    cout << "Contenido del Correo: " << endl;
-			    cin.getline(Correo1.contenido, 500, '|');
-			    
-			    consiguehorayfecha();
-		    	consiguehorayfecha();
-			    
-			    Temp.seekp((idModificar - 1)*sizeof(Correo1), ios::beg);
-				Temp << Correo1.identificador << ';' << Correo1.remitente << ';'
-                    	<< Correo1.destinatario << ';' << Correo1.copiaCarbon << ';'
-                        << Correo1.copiaCarbonCiega << ';' << Correo1.asunto << ';'
-                        << Correo1.contenido << ';' << Correo1.fechaCreacion.dia << ';'
-                        << Correo1.fechaCreacion.mes << ';' << Correo1.fechaCreacion.anio << ';'
-                        << Correo1.horaCreacion.hora << ';' << Correo1.horaCreacion.minuto << '|' << endl;
-                        
-                cout << endl << "Registro modificado exitosamente." << endl;
+
+			// Obtener datos del usuario.
+			string REMITENTE;
+			string DESTINATARIO;
+			string COPIACARBON;
+			string COPIACARBONCIEGA;
+			string ASUNTO;
+			string CONTENIDO;
+
+			cout << "Remitente: " << endl;
+			fflush(stdin);
+			cin.ignore();
+			cin.clear();
+			getline(cin, REMITENTE);
+			cout << "Destinatario: " << endl;
+			getline(cin, DESTINATARIO);
+			cout << "CopiaCarbon: " << endl;
+			getline(cin, COPIACARBON);
+			cout << "CopiaCarbonCiega: " << endl;
+			getline(cin, COPIACARBONCIEGA);
+			cout << "Asunto: " << endl;
+			getline(cin, ASUNTO);
+			cout << "Escriba '|' para teminar la entrada." << endl;
+			cout << "Contenido del Correo: " << endl;
+			getline(cin, CONTENIDO, '|');
+
+			consiguehorayfecha();
+			consiguehorayfecha();
+
+			while(!Archivo.eof()) {
+				getline(Archivo, ID, ';');
+
+				if(Archivo.eof()) {
+					break;
+				}
+
+				cout << "id" << ID << "\n";
+				Correo1.identificador = stoi(ID);
+
+				getline(Archivo, temp, ';');
+				int n = temp.length();
+				char a[n+1];
+				strcpy(a, temp.c_str());
+				strcpy(Correo1.remitente, a);
+				//std::cout << "Remitenteeeee: " << Correo1.remitente << "\n";
+
+				getline(Archivo, temp, ';');
+				strcpy(a, temp.c_str());
+				strcpy(Correo1.destinatario, a);
+				//std::cout << "destinatario: " << Correo1.destinatario<< "\n";
+
+				getline(Archivo, temp, ';');
+				strcpy(a, temp.c_str());
+				strcpy(Correo1.copiaCarbon, a);
+				//std::cout << "copia carbon: " << Correo1.copiaCarbon<< "\n";
+				getline(Archivo, temp, ';');
+
+				strcpy(a, temp.c_str());
+				strcpy(Correo1.copiaCarbonCiega, a);
+				//std::cout << "copiaCarbonCiega: " << Correo1.copiaCarbonCiega<< "\n";
+
+				getline(Archivo, temp, ';');
+				strcpy(a, temp.c_str());
+				strcpy(Correo1.asunto, a);
+				//std::cout << "asunto: " << Correo1.asunto << "\n";
+
+				getline(Archivo, temp, ';');
+				strcpy(a, temp.c_str());
+				strcpy(Correo1.contenido, a);
+				//std::cout << "contenido: " << Correo1.contenido << "\n";
+
+				getline(Archivo, temp, ';');
+				fecha.dia = stoi(temp);
+				//std::cout << "dia: " << fecha.dia << "\n";
+
+				getline(Archivo, temp, ';');
+				fecha.mes = stoi(temp);
+				//std::cout << "mes: " << fecha.mes<< "\n";
+
+				getline(Archivo, temp, ';');
+				fecha.anio= stoi(temp);
+				//std::cout << "anio: " << fecha.anio<< "\n";
+
+				getline(Archivo, temp, ';');
+				hora.hora= stoi(temp);
+				//std::cout << "hora: " << hora.hora<< "\n";
+
+				getline(Archivo, temp, ';');
+				hora.minuto= stoi(temp);
+
+				// MODIFICA LA VERGA.
+				if(idModificar == stoi(ID)) {
+					Temp << ID << delimitador << REMITENTE<< delimitador
+						 << DESTINATARIO << delimitador << COPIACARBON << delimitador
+						 << COPIACARBONCIEGA << delimitador <<  ASUNTO<< delimitador
+						 << CONTENIDO << delimitador << Correo1.fechaCreacion.dia << delimitador
+						 << Correo1.fechaCreacion.mes << delimitador <<Correo1.fechaCreacion.anio << delimitador
+						 //<< Correo1.horaCreacion.hora << delimitador << Correo1.horaCreacion.minuto << finRegistro << endl;
+						 << Correo1.horaCreacion.hora << delimitador << Correo1.horaCreacion.minuto << delimitador << endl;
+				} else {
+					Temp << Correo1.identificador << delimitador << Correo1.remitente << delimitador
+						 << Correo1.destinatario << delimitador << Correo1.copiaCarbon << delimitador
+						 << Correo1.copiaCarbonCiega << delimitador << Correo1.asunto << delimitador
+						 << Correo1.contenido << delimitador << Correo1.fechaCreacion.dia << delimitador
+						 << Correo1.fechaCreacion.mes << delimitador <<Correo1.fechaCreacion.anio << delimitador
+						 //<< Correo1.horaCreacion.hora << delimitador << Correo1.horaCreacion.minuto << finRegistro << endl;
+						 << Correo1.horaCreacion.hora << delimitador << Correo1.horaCreacion.minuto << delimitador << endl;
+				}
 			}
-			if(encontrado == false){
-				cout << "Elemento no encontrado" << endl;
-			}
+
+
+			//int buscar = ((idModificar-1)*sizeof(Correo));
+            //Archivo.seekg(buscar);
+            //Archivo.read((char*)&Correo1,sizeof(Correo));
+
+			//if(Correo1.identificador != 0)
+			//{
+				//encontrado = true;
+
+				//cout << "Registro encontrado !! " << endl;
+				//cout << "Ingrese nuevos datos: " << endl;
+				//cout << "Remitente: " << endl;
+				//cin.clear();
+				//cin.ignore();
+				//cin.getline(Correo1.remitente, 20);
+				//cout << "Destinatario: " << endl;
+				//cin.getline(Correo1.destinatario, 30);
+				//cout << "CopiaCarbon: " << endl;
+				//cin.getline(Correo1.copiaCarbon, 15);
+				//cout << "CopiaCarbonCiega: " << endl;
+				//cin.getline(Correo1.copiaCarbonCiega, 30);
+				//cout << "Asunto: " << endl;
+				//cin.getline(Correo1.asunto, 50);
+				//cout << "Escriba '|' para teminar la entrada." << endl;
+				//cout << "Contenido del Correo: " << endl;
+				//cin.getline(Correo1.contenido, 500, '|');
+
+				//consiguehorayfecha();
+				//consiguehorayfecha();
+
+				//Temp.seekp((idModificar - 1)*sizeof(Correo1), ios::beg);
+				//Temp << Correo1.identificador << ';' << Correo1.remitente << ';'
+                        //<< Correo1.destinatario << ';' << Correo1.copiaCarbon << ';'
+                        //<< Correo1.copiaCarbonCiega << ';' << Correo1.asunto << ';'
+                        //<< Correo1.contenido << ';' << Correo1.fechaCreacion.dia << ';'
+                        //<< Correo1.fechaCreacion.mes << ';' << Correo1.fechaCreacion.anio << ';'
+                        //<< Correo1.horaCreacion.hora << ';' << Correo1.horaCreacion.minuto << '|' << endl;
+
+                //cout << endl << "Registro modificado exitosamente." << endl;
+			//}
+			//if(encontrado == false){
+				//cout << "Elemento no encontrado" << endl;
+			//}
 		}
 		Temp.close();
 	}
@@ -864,15 +1050,23 @@ void modificarArchivoSeguridad()
 
 void eliminarArchivoSeguridad()
 {
+
+	string temp;
+	string ID;
+
 	int idEliminar;
 	string nombreArchivo;
 	bool encontrado = false;
 	fflush(stdin);
+	cin.ignore();
+	cin.clear();
 	cout << "Ingrese el nombre del archivo donde desea eliminar un registro: ";
 	getline(cin,nombreArchivo);
 	nombreArchivo = nombreArchivo + ".csv";
-	fstream Temp("temp.csv",ios::out | ios::in | ios::trunc);
-	fstream Archivo(nombreArchivo.c_str(), ios::in | ios::trunc | ios::out);
+	ofstream Temp("temp.csv", std::ios_base::out);
+	//fstream Temp("temp.csv",ios::out | ios::in);
+	ifstream Archivo(nombreArchivo.c_str(), std::ios_base::in);
+	//fstream Archivo(nombreArchivo.c_str(), ios::in | ios::trunc | ios::out);
 	if(!Archivo.good()){
 		cerr << "Error al intentar abrir el archivo base para hacer la copia de seguridad." << endl;
 	}
@@ -885,21 +1079,104 @@ void eliminarArchivoSeguridad()
 		{
 			cout << "Ingrese ID asociado a registro a eliminar: ";
 			cin >> idEliminar;
-			int buscar = ((idEliminar-1)*sizeof(Correo));
-            Archivo.seekg(buscar);
-            Archivo.read((char*)&Correo1,sizeof(Correo));
-			if(Correo1.identificador != 0)
-			{
-				encontrado = true;
-				Correo1.identificador = 0;
-				Archivo.write((char *)&Correo1, sizeof(Correo));
+			//int buscar = ((idEliminar-1)*sizeof(Correo));
+            //Archivo.seekg(buscar);
+            //Archivo.read((char*)&Correo1,sizeof(Correo));
+
+			while(!Archivo.eof()) {
+				getline(Archivo, ID, ';');
+
+				if(Archivo.eof()) {
+					break;
+				}
+
+				cout << "id" << ID << "\n";
+				Correo1.identificador = stoi(ID);
+
+				getline(Archivo, temp, ';');
+				int n = temp.length();
+				char a[n+1];
+				strcpy(a, temp.c_str());
+				strcpy(Correo1.remitente, a);
+				//std::cout << "Remitenteeeee: " << Correo1.remitente << "\n";
+
+				getline(Archivo, temp, ';');
+				strcpy(a, temp.c_str());
+				strcpy(Correo1.destinatario, a);
+				//std::cout << "destinatario: " << Correo1.destinatario<< "\n";
+
+				getline(Archivo, temp, ';');
+				strcpy(a, temp.c_str());
+				strcpy(Correo1.copiaCarbon, a);
+				//std::cout << "copia carbon: " << Correo1.copiaCarbon<< "\n";
+				getline(Archivo, temp, ';');
+
+				strcpy(a, temp.c_str());
+				strcpy(Correo1.copiaCarbonCiega, a);
+				//std::cout << "copiaCarbonCiega: " << Correo1.copiaCarbonCiega<< "\n";
+
+				getline(Archivo, temp, ';');
+				strcpy(a, temp.c_str());
+				strcpy(Correo1.asunto, a);
+				//std::cout << "asunto: " << Correo1.asunto << "\n";
+
+				getline(Archivo, temp, ';');
+				strcpy(a, temp.c_str());
+				strcpy(Correo1.contenido, a);
+				//std::cout << "contenido: " << Correo1.contenido << "\n";
+
+				getline(Archivo, temp, ';');
+				fecha.dia = stoi(temp);
+				//std::cout << "dia: " << fecha.dia << "\n";
+
+				getline(Archivo, temp, ';');
+				fecha.mes = stoi(temp);
+				//std::cout << "mes: " << fecha.mes<< "\n";
+
+				getline(Archivo, temp, ';');
+				fecha.anio= stoi(temp);
+				//std::cout << "anio: " << fecha.anio<< "\n";
+
+				getline(Archivo, temp, ';');
+				hora.hora= stoi(temp);
+				//std::cout << "hora: " << hora.hora<< "\n";
+
+				getline(Archivo, temp, ';');
+				hora.minuto= stoi(temp);
+
+				// ELIMINAR A LA VERGA.
+				if(idEliminar != stoi(ID)) {
+					Temp << Correo1.identificador << delimitador << Correo1.remitente << delimitador
+						 << Correo1.destinatario << delimitador << Correo1.copiaCarbon << delimitador
+						 << Correo1.copiaCarbonCiega << delimitador << Correo1.asunto << delimitador
+						 << Correo1.contenido << delimitador << Correo1.fechaCreacion.dia << delimitador
+						 << Correo1.fechaCreacion.mes << delimitador <<Correo1.fechaCreacion.anio << delimitador
+						 //<< Correo1.horaCreacion.hora << delimitador << Correo1.horaCreacion.minuto << finRegistro << endl;
+						 << Correo1.horaCreacion.hora << delimitador << Correo1.horaCreacion.minuto << delimitador << endl;
+				}
 			}
-			if(encontrado == false){
-				cout << "Elemento no encontrado" << endl;
-			}
-			else{
-				cout << "Registro modificado exitosamente." << endl;
-			}
+
+			//if(Correo1.identificador != 0)
+			//{
+				//encontrado = true;
+				//Correo1.identificador = 0;
+
+				//Temp << Correo1.identificador << delimitador << Correo1.remitente << delimitador
+					 //<< Correo1.destinatario << delimitador << Correo1.copiaCarbon << delimitador
+					 //<< Correo1.copiaCarbonCiega << delimitador << Correo1.asunto << delimitador
+					 //<< Correo1.contenido << delimitador << Correo1.fechaCreacion.dia << delimitador
+					 //<< Correo1.fechaCreacion.mes << delimitador <<Correo1.fechaCreacion.anio << delimitador
+					 //<< Correo1.horaCreacion.hora << delimitador << Correo1.horaCreacion.minuto << finRegistro << endl;
+					 //<< Correo1.horaCreacion.hora << delimitador << Correo1.horaCreacion.minuto << delimitador << endl;
+
+				//Archivo.write((char *)&Correo1, sizeof(Correo));
+			//}
+			//if(encontrado == false){
+				//cout << "Elemento no encontrado" << endl;
+			//}
+			//else{
+				//cout << "Registro modificado exitosamente." << endl;
+			//}
 		}
 		Temp.close();
 	}
