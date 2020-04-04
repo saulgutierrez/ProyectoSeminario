@@ -1203,7 +1203,55 @@ void busquedaEnMemoria()
 		cout << "Contenido: " << guardaRegistros[i].contenido << endl;
 		cout << endl;
 	}
-
+	cin.get();
+	cin.get();
+	system("cls");
+	char opcion;
+	string str;
+	cout << "Desea realizar una busqueda(s/n) ? ";
+	cin >> opcion;
+	string remitenteABuscar;
+	if(opcion == 's' or opcion == 'S'){
+        cout << "Ingrese el nombre del remitente a buscar: ";
+        cin.clear();
+        cin.ignore();
+        getline(cin, remitenteABuscar);
+        for(int i(0); i < tamanio; i++)
+        {
+            str = guardaRegistros[i].remitente;
+            if(remitenteABuscar == str){
+                cout << "Registro encontrado" << endl;
+                cout << "Mostrando..." << endl;
+                cout << "ID: " << guardaRegistros[i].identificador << endl;
+                cout << "Remitente: " << guardaRegistros[i].remitente << endl;
+                cout << "Destinatario: " << guardaRegistros[i].destinatario << endl;
+                cout << "Copia Carbon: " << guardaRegistros[i].copiaCarbon << endl;
+                cout << "Copia Carbon Ciega: " << guardaRegistros[i].copiaCarbonCiega << endl;
+                cout << "Asunto: " << guardaRegistros[i].asunto << endl;
+                cout << "Contenido: " << guardaRegistros[i].contenido << endl;
+                cout << "Fecha: " << guardaRegistros[i].fechaCreacion.dia << "/" << guardaRegistros[i].fechaCreacion.mes << "/" << guardaRegistros[i].fechaCreacion.anio << endl;
+                cout << "Hora: " << guardaRegistros[i].horaCreacion.hora << ":" << guardaRegistros[i].horaCreacion.minuto << endl;
+                break;
+            }
+            else{
+                cerr << "Registro no encontrado" << endl;
+                break;
+            }
+        }
+	}
+	else if(opcion == 'n' or opcion == 'n'){
+        cout << "Volviendo al menu principal" << endl;
+        cin.get();
+        cin.get();
+        elegirOpcion();
+	}
+	else{
+        cerr << "No introdujo una opcion correcta." << endl;
+        cout << "Volviendo al menu principal" << endl;
+        cin.get();
+        cin.get();
+        elegirOpcion();
+	}
 Archivo.close();
 }
 
