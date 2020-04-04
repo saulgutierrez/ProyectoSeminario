@@ -7,6 +7,7 @@
 #include <time.h>
 #include <vector>
 #include <ctime>
+#include <stdexcept>
 #include <cstring>
 
 #define delimitador ';'
@@ -62,6 +63,8 @@ void imprimirInformacion();
 void exportaraDat();
 void mostrarArchivoDat();
 void imprimirArchivoDat();
+void busquedaEnMemoria();
+void shellSort(Correo *, int);
 
 Correo Correo1;
 Fecha fecha;
@@ -131,6 +134,11 @@ int main()
             pausa();
             break;
         case 12:
+			system("CLS");
+			busquedaEnMemoria();
+			pausa();
+			break;
+        case 13:
             continuarPrograma = false;
             break;
 
@@ -171,7 +179,8 @@ int elegirOpcion()
     cout << "9. Eliminar archivo csv (Copia de seguridad)" << endl;
     cout << "10. Exportar a Dat (Fichero de datos)" << endl;
     cout << "11. Mostrar archivo Dat (Fichero de datos)" << endl;
-    cout << "12. Salir" << endl;
+    cout << "12. Busqueda en memoria (Cargar a RAM)" << endl;
+    cout << "13. Salir" << endl;
     cout << "Opcion: ";
     cin >> opcion;
     cin.clear();
@@ -188,7 +197,7 @@ void ingresaCorreo()
         archivo.open("Correos.txt", ios::out);
         if( ! archivo.good() )
         {
-            cout << "Error al crear el archivo... abortando" << endl;
+            cerr << "Error al crear el archivo... abortando" << endl;
             return;
         }
     }
@@ -257,7 +266,7 @@ void mostrarCorreo()
     bool encontrado = false;
     if (Archivo.fail())
     {
-        cout << "Error en el archivo, no se puede acceder" << endl;
+        cerr << "Error en el archivo, no se puede acceder" << endl;
     }
     else
     {
@@ -318,7 +327,7 @@ void buscarCorreo()
         }
         else
         {
-            cout << "Error al abrir el archivo" << endl;
+            cerr << "Error al abrir el archivo" << endl;
         }
         Archivo.close();
     }
@@ -354,7 +363,7 @@ void buscarCorreo()
 
         else
         {
-            cout << "Error al abrir el archivo" << endl;
+            cerr << "Error al abrir el archivo" << endl;
         }
         Archivo.close();
     }
@@ -381,7 +390,7 @@ void modificarCorreo()
         ifstream Archivo("Correos.txt", ios::in | ios::binary);
         if (Archivo.fail())
         {
-            cout << "Error al abrir el archivo" << endl;
+            cerr << "Error al abrir el archivo" << endl;
         }
 
         archivo.open("Correos.txt", ios::out| ios::in | ios::binary);
@@ -390,7 +399,7 @@ void modificarCorreo()
             archivo.open("Correos.txt", ios::out);
             if( ! archivo.good() )
             {
-                cout << "Error al abrir el archivo" << endl;
+                cerr << "Error al abrir el archivo" << endl;
                 return;
             }
         }
@@ -398,7 +407,7 @@ void modificarCorreo()
         cin >> id;
         while(id <= 0)
         {
-            cout << "ID no valido \n Ingrese un ID valido" << endl;
+            cerr << "ID no valido \n Ingrese un ID valido" << endl;
             cin >> id;
         }
         while (!Archivo.eof())
@@ -454,7 +463,7 @@ void modificarCorreo()
         ifstream Archivo("Correos.txt", ios::in | ios::binary);
         if (Archivo.fail())
         {
-            cout << "Error al abrir el archivo" << endl;
+            cerr << "Error al abrir el archivo" << endl;
         }
         cin.ignore();
         cout << "Ingresa el remitente del correo a modificar: " << endl;
@@ -482,7 +491,7 @@ void modificarCorreo()
                         archivo.open("Correos.txt", ios::out);
                         if( ! archivo.good() )
                         {
-                            cout << "Error al abrir el archivo" << endl;
+                            cerr << "Error al abrir el archivo" << endl;
                             return;
                         }
                     }
@@ -514,7 +523,7 @@ void modificarCorreo()
                 }
                 else
                 {
-                    cout << "Este Correo no se modifico... " << endl;
+                    cerr << "Este Correo no se modifico... " << endl;
                     pausa();
                 }
             }
@@ -565,7 +574,7 @@ void eliminarCorreo()
                         archivoaEliminar.open("Correos.txt", ios::out);
                         if( ! archivoaEliminar.good() )
                         {
-                            cout << "Error al abrir el archivo" << endl;
+                            cerr << "Error al abrir el archivo" << endl;
                             return;
                         }
                     }
@@ -589,7 +598,7 @@ void eliminarCorreo()
         }
         else
         {
-            cout << "Error al abrir el archivo" << endl;
+            cerr << "Error al abrir el archivo" << endl;
         }
         Archivo.close();
     }
@@ -628,7 +637,7 @@ void eliminarCorreo()
                             archivoaEliminar.open("Correos.txt", ios::out);
                             if( ! archivoaEliminar.good() )
                             {
-                                cout << "Error al abrir el archivo" << endl;
+                                cerr << "Error al abrir el archivo" << endl;
                                 return;
                             }
                         }
@@ -648,7 +657,7 @@ void eliminarCorreo()
         }
         else
         {
-            cout << "Error al abrir el archivo" << endl;
+            cerr << "Error al abrir el archivo" << endl;
         }
         Archivo.close();
     }
@@ -680,7 +689,7 @@ void exportaraCsv()
 
         ofstream file(nombreArchivo.c_str(), ios::in | ios::trunc |ios::out);
         if (!file.good()){
-        	cout << "El archivo para guardar la copia de seguridad no se puede abrir" << endl;
+        	cerr << "El archivo para guardar la copia de seguridad no se puede abrir" << endl;
 		}
         else
         {
@@ -727,7 +736,7 @@ void mostrarArchivoSeguridad()
 	nombreArchivo = nombreArchivo + ".csv";
 	ifstream Archivo(nombreArchivo.c_str());
 	if(Archivo.fail()){
-		cout << "No existe tal archivo, o ha sido movido de la carpeta del .csv" << endl;
+		cerr << "No existe tal archivo, o ha sido movido de la carpeta del .csv" << endl;
 	}
 	else
 	{
@@ -833,7 +842,7 @@ void modificarArchivoSeguridad()
 	else
 	{
 		if(!Archivo.good()){
-			cout << "El archivo para guardar la copia de seguridad no se puede abrir" << endl;
+			cerr << "El archivo para guardar la copia de seguridad no se puede abrir" << endl;
 		}
 		else
 		{
@@ -969,7 +978,7 @@ void eliminarArchivoSeguridad()
 	else
 	{
 		if(!Archivo.good()){
-			cout << "El archivo para guardar la copia de seguridad no se puede abrir" << endl;
+			cerr << "El archivo para guardar la copia de seguridad no se puede abrir" << endl;
 		}
 		else
 		{
@@ -1049,7 +1058,6 @@ void exportaraDat()
 {
     string nombreArchivo;
     Correo Correo1;
-    int ID;
     cout << "Ingrese el nombre del archivo de datos: ";
     cin.clear();
     cin.ignore();
@@ -1083,7 +1091,6 @@ void mostrarArchivoDat()
 {
     ifstream Copia;
     string nombreArchivo;
-    int ID;
     bool encontrado = false;
     cout << "Digite el nombre del archivo que desea leer: ";
     cin.clear();
@@ -1130,4 +1137,100 @@ void imprimirArchivoDat()
     cin.get();
     cin.get();
     cin.ignore();
+}
+
+void busquedaEnMemoria()
+{
+	Correo Correo1;
+	Correo guardaRegistros[1000];
+	int i = 0;
+	int contador = 1;
+	int tamanio;
+	string nombreArchivo;
+	cout << "Ingrese el nombre del archivo que desea cargar a memoria: ";
+	cin.clear();
+	cin.ignore();
+	getline(cin, nombreArchivo);
+	ifstream Archivo;
+	nombreArchivo = nombreArchivo + ".txt";
+	Archivo.open(nombreArchivo.c_str(), ios_base::in | ios_base::binary);
+
+	if(Archivo.fail()){
+		throw "Error al leer el archivo";
+		Archivo.close();
+	}
+	else if(Archivo.is_open()){
+		while(!Archivo.eof()){
+			Archivo.seekg((contador - 1) * sizeof(Correo1), std::ios_base::beg);
+			Archivo.read((char *)&Correo1, sizeof(Correo1));
+
+			if(Correo1.identificador == 0){
+				contador++;
+				continue;
+			}
+
+			guardaRegistros[i] = Correo1;
+
+			tamanio = i;
+			i++;
+			contador++;
+		}
+	}
+	cout << "Mostrando registros en memoria: " << endl;
+	for(int i(0); i < tamanio; i++){
+		cout << "ID: " << guardaRegistros[i].identificador << endl;
+		cout << "Remitente: " << guardaRegistros[i].remitente << endl;
+		cout << "Destinatario: " << guardaRegistros[i].destinatario << endl;
+		cout << "Copia Carbon: " << guardaRegistros[i].copiaCarbon << endl;
+		cout << "Copia Carbon Ciega: " << guardaRegistros[i].copiaCarbonCiega << endl;
+		cout << "Asunto: " << guardaRegistros[i].asunto << endl;
+		cout << "Contenido: " << guardaRegistros[i].contenido << endl;
+		cout << endl;
+	}
+	pausa();
+
+	cout << "Ordenando por remitente..." << endl;
+	pausa();
+	shellSort(guardaRegistros, tamanio);
+	cout << "Mostrando registros ordenados por remitente: " << endl;
+	for(int i(0); i < tamanio; i++){
+		cout << "ID: " << guardaRegistros[i].identificador << endl;
+		cout << "Remitente: " << guardaRegistros[i].remitente << endl;
+		cout << "Destinatario: " << guardaRegistros[i].destinatario << endl;
+		cout << "Copia Carbon: " << guardaRegistros[i].copiaCarbon << endl;
+		cout << "Copia Carbon Ciega: " << guardaRegistros[i].copiaCarbonCiega << endl;
+		cout << "Asunto: " << guardaRegistros[i].asunto << endl;
+		cout << "Contenido: " << guardaRegistros[i].contenido << endl;
+		cout << endl;
+	}
+
+Archivo.close();
+}
+
+void shellSort(Correo *guardaRegistros, int tamanio)
+{
+	std::string str1;
+	std::string str2;
+	Correo aux;
+	for(int gap = tamanio / 2; gap > 0; gap /= 2)
+	{
+		for(int i = gap; i < tamanio; i += 1)
+		{
+			for(int j = i-gap; j >= 0; j = j-gap)
+			{
+				str1 = guardaRegistros[j].remitente;
+				str2 = guardaRegistros[j + gap].remitente;
+
+				if(str1 <= str2){
+					//if(guardaRegistros[j].contenido >= guardaRegistros[j + gap].email){
+						break;
+				}
+				else{
+					aux = guardaRegistros[j];
+					guardaRegistros[j] = guardaRegistros[j + gap];
+					guardaRegistros[j + gap] = aux;
+				}
+			}
+		}
+	}
 }
