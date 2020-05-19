@@ -1154,27 +1154,28 @@ void busquedaEnMemoria() {
         cin.clear();
         cin.ignore();
         getline(cin, remitenteABuscar);
-        for(int i(0); i < tamanio; i++) {
-            str = guardaRegistros[i].remitente;
-            if(remitenteABuscar == str) {
-                cout << "Registro encontrado" << endl;
-                cout << "Mostrando..." << endl;
-                cout << "ID: " << guardaRegistros[i].identificador << endl;
-                cout << "Remitente: " << guardaRegistros[i].remitente << endl;
-                cout << "Destinatario: " << guardaRegistros[i].destinatario << endl;
-                cout << "Copia Carbon: " << guardaRegistros[i].copiaCarbon << endl;
-                cout << "Copia Carbon Ciega: " << guardaRegistros[i].copiaCarbonCiega << endl;
-                cout << "Asunto: " << guardaRegistros[i].asunto << endl;
-                cout << "Contenido: " << guardaRegistros[i].contenido << endl;
-                cout << "Fecha: " << guardaRegistros[i].fechaCreacion.dia << "/" << guardaRegistros[i].fechaCreacion.mes << "/" << guardaRegistros[i].fechaCreacion.anio << endl;
-                cout << "Hora: " << guardaRegistros[i].horaCreacion.hora << ":" << guardaRegistros[i].horaCreacion.minuto << endl;
-                break;
-            } else{
-                cerr << "Registro no encontrado" << endl;
-                break;
-            }
-        }
-	} else if(opcion == 'n' or opcion == 'n') {
+        i = 0;
+        bool encontrado = false;
+        while((encontrado == false) and (i < tamanio)) {
+			if(guardaRegistros[i].remitente == remitenteABuscar) {
+				encontrado = true;
+			}
+			i++;
+		}
+		if(encontrado == false) {
+			cerr << "Registro no encontrado." << endl;
+		} else {
+			cout << "Registro encontrado" << endl;
+			cout << "Mostrando..." << endl;
+			cout << "ID: " << guardaRegistros[i-1].identificador << endl;
+			cout << "Remitente: " << guardaRegistros[i-1].remitente << endl;
+			cout << "Destinatario: " << guardaRegistros[i-1].destinatario << endl;
+			cout << "Copia Carbon: " << guardaRegistros[i-1].copiaCarbon << endl;
+			cout << "Copia Carbon Ciega: " << guardaRegistros[i-1].copiaCarbonCiega << endl;
+			cout << "Asunto: " << guardaRegistros[i-1].asunto << endl;
+			cout << "Contenido: " << guardaRegistros[i-1].contenido << endl;
+		}
+	} else if(opcion == 'N' or opcion == 'n') {
         cout << "Volviendo al menu principal" << endl;
         cin.get();
         cin.get();
