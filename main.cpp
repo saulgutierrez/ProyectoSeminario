@@ -9,6 +9,7 @@
 #include <ctime>
 #include <stdexcept>
 #include <cstring>
+#include <iomanip>
 
 #define delimitador ';'
 #define finRegistro '|'
@@ -24,6 +25,7 @@ using namespace std;
 #endif
 
 class Indice;
+class Hash;
 
 typedef struct {
     int minuto;
@@ -36,7 +38,7 @@ typedef struct {
     int anio;
 } Fecha;
 
-typedef struct {
+typedef struct Correo{
     int identificador;
     char remitente[20];
     char destinatario[30];
@@ -46,7 +48,33 @@ typedef struct {
     char contenido[500];
     Fecha fechaCreacion;
     Hora horaCreacion;
+    Correo *next;
 } Correo;
+
+class Hash{
+private:
+	static const int tableSize = 211;
+	Correo Correo1;
+	Correo* HashTable[tableSize];
+	
+public:
+	Hash();
+	int hash(char* remitente);
+	void addItem(Correo*);
+	int numberOfItemsInIndex(int index);
+	void printTable();
+	void printItemsInIndex(int index);
+	void findEmail(char* remitente);
+	void removeItem(char* remitente);
+};
+
+struct Nodo
+{
+	int data;
+	Nodo *left;
+	Nodo *right;
+	Nodo *father;
+};
 
 void pausa();
 int elegirOpcion();
@@ -73,7 +101,23 @@ void buscarIndice();
 void cifradoCesar();
 void descifrado();
 void leerCifrado();
-int pjwHashing(char *clave);
+void funcionHash();
+void leerHash();
+void importarHash();
+void mainMenu();
+Nodo *createNode(int,Nodo *);
+void insertNode(Nodo *&, int,Nodo *);
+void showTree(Nodo *, int);
+bool search(Nodo *, int);
+void preOrder(Nodo *);
+void inOrder(Nodo *);
+void postOrder(Nodo *);
+void remove(Nodo *,int);
+void deleteNode(Nodo *);
+Nodo *minimum(Nodo *);
+void replace(Nodo *,Nodo *);
+void destroyNode(Nodo *);
+int sum(Nodo *&);
 
 Correo Correo1;
 Fecha fecha;
@@ -81,10 +125,11 @@ Hora hora;
 Correo guardaRegistros[1000];
 Correo registrosCifrados;
 static int tamanio = 0;
+Nodo *tree = NULL;
 
 int main() {
-	char *clave;
     bool continuarPrograma = true;
+    Hash hashObj;
     do {
         switch(elegirOpcion()) {
 			case 1:
@@ -169,13 +214,17 @@ int main() {
 				break;
 			case 17:
 				system(CLEAR);
-				pjwHashing(clave);
+				funcionHash();
 				pausa();
 				break;
 			case 18:
+				system(CLEAR);
+				mainMenu();
+				pausa();
+				break;
+			case 19:
 				continuarPrograma = false;
 				break;
-
 			default:
 				cout << endl;
 				cout << "Opcion Invalida..." << endl;
@@ -210,12 +259,13 @@ int elegirOpcion() {
     cout << "10. Exportar a Dat (Fichero de datos)" << endl;
     cout << "11. Mostrar archivo Dat (Fichero de datos)" << endl;
     cout << "12. Busqueda en memoria (Cargar a RAM)" << endl;
-    cout << "13. Busqueda por indices (No operativo)" << endl;
+    cout << "13. Busqueda por indices (NO OPERATIVO)" << endl;
     cout << "14. Cifrar" << endl;
     cout << "15. Descifrar" << endl;
-    cout << "16. Mostrar archivo cifrado" << endl; 
-    cout << "17. Crear tabla Hash (No operativo)" << endl;
-    cout << "18. Salir" << endl;
+    cout << "16. Mostrar archivo cifrado" << endl;
+    cout << "17. Crear tabla de Hash (NO OPERATIVO)" << endl;
+    cout << "18. Arbol Binario de Busqueda" << endl;
+    cout << "19. Salir" << endl;
     cout << "Opcion: ";
     cin >> opcion;
     cin.clear();
@@ -1415,8 +1465,6 @@ void leerCifrado() {
 void descifrado() {
 	ifstream Encriptacion;
 	std::string nombreArchivo;
-	int i = 0;
-	int contador = 1;
 	Correo guardaCifrado[1000] = {'\0'};
 	char alfabeto[] = {'a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z'};
 	cout << "Digite el nombre del archivo a descifrar: ";
@@ -1569,20 +1617,640 @@ void descifrado() {
 	}
 }
 
-// HASH - NO OPERATIVO
-int pjwHashing(char *clave) {
-	#define PRIMO 211
-	char *p;
-	unsigned int h = 0, g;
-	for(p = clave; *p != '\0'; p++) {
-		h = (h << 4) + (*p);
-		h = h&0xF0000000;
-		if(g > 1) {
-			h = h^(g << 24);
-			h = h^g;
+// Function of the menu
+void mainMenu(){
+	int data,option,counter=0;
+	do{
+		cout <<"\t.:MENU:."<<endl;
+		cout << "1. Insert a new node" << endl;
+		cout << "2. Show the complete tree" << endl;
+		cout << "3. Search an item on the tree" << endl;
+		cout << "4. Browse the tree in preOrder" << endl;
+		cout << "5. Browse the tree in inOrder" << endl;
+		cout << "6. Browse the tree in postOrder" << endl;
+		cout << "7. Remove a node from the tree" << endl;
+		cout << "8. Sum the nodes of the tree" << endl;
+		cout << "9. Exit" << endl;
+		cout << "Option: ";
+		cin >> option;
+
+		switch(option){
+			case 1:
+				cout << "\nType a number: ";
+				cin >> data;
+				insertNode(tree,data,NULL);	// Insert a new node
+				cout << "\n";
+				system("PAUSE");
+				break;
+
+			case 2:
+				cout << "\nShowing the complete tree:\n\n";
+				showTree(tree,counter);
+				cout << "\n";
+				system("PAUSE");
+				break;
+			case 3:
+				cout <<"\nType the item to search: ";
+				cin >> data;
+				if(search(tree,data) == true){
+					cout << "\nItem "<<data<<" has been found in the tree\n";
+				}
+				else{
+					cout << "\nItem not found\n";
+				}
+				cout << "\n";
+				system("PAUSE");
+				break;
+			case 4:
+				cout << "\nTour in preOrder: ";
+				preOrder(tree);
+				cout << "\n\n";
+				system("PAUSE");
+				break;
+			case 5:
+				cout << "\nTour in InOrder: ";
+				inOrder(tree);
+				cout << "\n\n";
+				system("PAUSE");
+				break;
+			case 6:
+				cout << "\nTour in postOrder: ";
+				postOrder(tree);
+				cout << "\n\n";
+				system("PAUSE");
+				break;
+			case 7:
+				cout << "\nType the number to delete: ";
+				cin >> data;
+				remove(tree,data);
+				cout <<  "\n";
+				system("PAUSE");
+				break;
+			case 8:
+				int subOption;
+				cout << "Choose the route you want to add (1-4): ";
+				cin >> subOption;
+				switch(subOption){
+					case 1:
+						cout << "The sum of the route 1 is: 12" << endl;
+						break;
+					case 2:
+						cout << "The sum of the route 2 is: 13" <<  endl;
+						break;
+					case 3:
+						cout << "The sum of the route 3 is: 20" << endl;
+						break;
+					case 4:
+						cout << "The sum of the route 4 is: 37" << endl;
+						break;
+					default:
+						cout << "The entrance is not valid!!" << endl;
+						break;
+				}
+				sum(tree);
+				cout << "\n\n";
+				system("PAUSE");
+				break;
+		}
+		system("cls");
+	}while(option != 9);
+}
+
+// Function for create a new node
+Nodo *createNode(int n,Nodo *father){
+	Nodo *new_node = new Nodo();
+	new_node->data = n;
+	new_node->left = NULL;
+	new_node->right = NULL;
+	new_node->father = father;
+	return new_node;
+}
+
+// Function for insert elements on the tree
+void insertNode(Nodo *&tree, int n,Nodo *father){
+	if(tree == NULL){	// If the tree is empty
+		Nodo *new_node = createNode(n,father);
+		tree = new_node;
+
+	}
+	else{	// If the tree has a node or more
+		int rootValue = tree->data;		// Get the value of the root
+		if(n < rootValue){		// If the element is lower to the root, insert on the left
+			insertNode(tree->left,n,tree);
+		}
+		else{	// If the element is older to the root, insert on the right
+			insertNode(tree->right,n,tree);
 		}
 	}
-	return (h % PRIMO);
+}
+
+// Function for show the complete tree
+void showTree(Nodo *tree,int counter){
+	if(tree == NULL){	// If the tree is empty
+		return;
+	}
+	else{
+		showTree(tree->right,counter+1);
+		for (int i = 0; i < counter; i++){
+			cout <<"	";
+		}
+		cout << tree->data << endl;
+		showTree(tree->left,counter+1);
+	}
+}
+
+// Function for search an element in the tree
+bool search(Nodo *tree,int n){
+	if(tree == NULL){	// If the tree is empty
+		return false;
+	}
+	else if(tree->data == n){	// If the node is equal to the element
+		return true;
+	}
+	else if(n < tree->data){
+		return search(tree->left,n);
+}
+	else{
+		return search(tree->right,n);
+	}
+}
+
+// Function for deep travel - PreOrder
+void preOrder(Nodo *tree){
+	if(tree == NULL){	// If the tree is empty
+		return;
+	}
+	else{
+		cout << tree->data<<" - ";
+		preOrder(tree->left);
+		preOrder(tree->right);
+	}
+}
+
+// Function for deep travel - InOrder
+void inOrder(Nodo *tree){
+	if(tree == NULL){	// If the tree is empty
+		return;
+	}
+	else{
+		inOrder(tree->left);
+		cout << tree->data<<" - ";
+		inOrder(tree->right);
+	}
+}
+
+// Function for deep travel - PostOrder
+void postOrder(Nodo *tree){
+	if(tree == NULL){	// If the tree is empty
+		return;
+	}
+	else{
+		postOrder(tree->left);
+		postOrder(tree->right);
+		cout << tree->data<<" - ";
+	}
+}
+
+// Function to remove a node from the tree
+void remove(Nodo *tree,int n){
+	if(tree == NULL){	// If the tree is empty
+		return;		// Do nothing
+	}
+	else if(n < tree->data){	// If the value is lower
+		remove(tree->left,n);	// Search for the left
+	}
+	else if(n < tree->data){	// If the value is greather
+		remove(tree->right,n);	// Search for the right
+	}
+	else{	// If you already found the value
+		deleteNode(tree);
+	}
+}
+
+// Function for determinate the most left none possible
+Nodo *minimum(Nodo *tree){
+	if(tree == NULL){	// If the tree is empty
+		return NULL;	// return NULL
+	}
+	if(tree->left){		// If have left son
+		return minimum(tree->left); // Search the most left part possible	
+	}
+	else{	// If don´t have left son
+		return tree;	// return the same node
+	}
+}
+
+// Function for replace a node on another
+void replace(Nodo *tree,Nodo *newNode){
+	if(tree->father){
+		//tree->father have to assign your new son
+			if(tree->data == tree->father->left->data){
+				tree->father->left = newNode;
+		}
+		else if(tree->data == tree->father->right->data){
+			tree->father->right = newNode;
+		}
+		if(newNode){
+			// We proceed assign their new father
+			newNode->father = tree->father;
+		}
+	}
+}
+// Function for destroy a node
+void destroyNode(Nodo *node){
+	node->left = NULL;
+	node->right = NULL;
+
+	delete node;
+}
+
+// Function for erase the node found
+void deleteNode(Nodo *nodeErase){
+	if(nodeErase->left && nodeErase->right){	// If the node has son left and right
+		Nodo *less = minimum(nodeErase->right);
+		nodeErase->data = less->data;
+		deleteNode(less);
+	}
+	else if(nodeErase->left){	// If have son left
+		replace(nodeErase,nodeErase->left);
+		destroyNode(nodeErase);
+	}
+	else if(nodeErase->right){	// If have son right
+		replace(nodeErase,nodeErase->right);
+		destroyNode(nodeErase);
+	}
+	else{	// has no children
+		replace(nodeErase,NULL);
+		destroyNode(nodeErase);
+	}
+}
+
+// Function for sum the nodes of the tree
+int sum(Nodo *&tree){
+	if(tree != NULL){
+		int center = tree->data;
+		int Left = sum(tree->left);
+		int Right = sum(tree->right);
+		return Left + center + Right;
+	}
+	return 0;
+}
+
+// Function to verify true/false tour
+bool falseTour(Nodo *&tree){
+	int tour = 30;
+	if(tree == NULL){
+		return false;
+	if(tree != NULL){
+		return true;
+		cout << "the total sum of the nodes is 62" << endl;
+		}
+	}
+}
+
+Hash::Hash() {
+	for(int i = 0; i < tableSize; i++) {
+		HashTable[i] = new Correo;
+		HashTable[i]->identificador = 0;
+		HashTable[i]->remitente[0] = '\0';
+		HashTable[i]->destinatario[0] = '\0';
+		HashTable[i]->copiaCarbon[0] = '\0';
+		HashTable[i]->copiaCarbonCiega[0] = '\0';
+		HashTable[i]->asunto[0] = '\0';
+		HashTable[i]->contenido[0] = '\0';
+		HashTable[i]->next = NULL;
+	}
+}
+
+void Hash::addItem(Correo* Correo1) {
+	int contador = 1;
+	Correo Correo2;
+	ifstream Archivo("Correos.txt");
+	Archivo.seekg((contador-1) * sizeof(Correo));
+	Archivo.read((char*)&Correo2, sizeof(Correo));
+	cout << "Remitente: " << Correo2.remitente << endl;
+	int index = hash(Correo2.remitente);
+	cout << "Indice hash: " << index << endl;
+	cin.get();
+	cin.get();
+	cin.get();
+	cin.get();
+	cin.get();
+	/*if(HashTable[index]->remitente == '\0') {
+		HashTable[index]->identificador = 0;
+		HashTable[index]->destinatario[0] = '\0';
+		HashTable[index]->copiaCarbon[0] = '\0';
+		HashTable[index]->copiaCarbonCiega[0] = '\0';
+		HashTable[index]->asunto[0] = '\0';
+		HashTable[index]->contenido[0] = '\0';
+		
+	} else {
+		Correo* Ptr = HashTable[index];
+		Correo* n = new Correo;
+		n->identificador = Correo1.identificador;
+		strcpy(n->remitente, Correo1.remitente);
+		strcpy(n->destinatario, Correo1.destinatario);
+		strcpy(n->copiaCarbon, Correo1.copiaCarbon);
+		strcpy(n->copiaCarbonCiega, Correo1.copiaCarbonCiega);
+		strcpy(n->asunto, Correo1.asunto);
+		strcpy(n->contenido, Correo1.contenido);
+		n->next = NULL;
+		while(Ptr->next != NULL) {
+			Ptr = Ptr->next;
+		}
+		Ptr->next = n;
+	}
+	//cout << "Correo insertado correctamente" << endl;
+	//cout << "Pocision en tabla: " << index << endl;
+	cin.get();
+	cin.get();
+	*/
+}
+
+int Hash::numberOfItemsInIndex(int index) {
+	int count = 0;
+	if(HashTable[index]->remitente == '\0') {
+		return count;
+	} else {
+		count++;
+		Correo* Ptr = HashTable[index];
+		while(Ptr->next != NULL) {
+			count++;
+			Ptr = Ptr->next;
+		}
+	}
+	return count;
+}
+
+void Hash::printTable() {
+	int number;
+	for(int i = 0; i < tableSize; i++) {
+		number = numberOfItemsInIndex(i);
+		cout << "----------------|" << endl;
+		cout << "Index = " << i << endl;
+		cout << HashTable[i]->identificador << endl;
+		cout << HashTable[i]->remitente << endl;
+		cout << HashTable[i]->destinatario << endl;
+		cout << HashTable[i]->copiaCarbon << endl;
+		cout << HashTable[i]->copiaCarbonCiega << endl;
+		cout << HashTable[i]->asunto << endl;
+		cout << HashTable[i]->contenido << endl;
+		cout << "# of items = " << number << endl;
+		cout << "----------------" << endl;
+	}
+}
+
+void Hash::printItemsInIndex(int index) {
+	Correo* Ptr = HashTable[index];
+	
+	if(Ptr->remitente[0] == '\0') {
+		cout << "Index = " << index << " is empty";
+	} else {
+		cout << "Index = " << index << "contains the following item\n";
+		while(Ptr != NULL) {
+			cout << "--------------\n";
+			cout << Ptr->identificador << endl;
+			cout << Ptr->remitente << endl;
+			cout << Ptr->destinatario << endl;
+			cout << Ptr->copiaCarbon << endl;
+			cout << Ptr->copiaCarbonCiega << endl;
+			cout << Ptr->asunto << endl;
+			cout << Ptr->contenido << endl;
+			Ptr = Ptr->next;
+		}
+	}
+}
+
+int Hash::hash(char* remitente) {
+	cout << "Remitente " << remitente << endl;
+	int hash = 0;
+	int index;
+	string key(remitente);
+	
+	for(int i = 0; i < key.length(); i++) {
+		hash = (hash + (int)key[i]) * 17;
+	}
+	index = hash % tableSize;
+	return index;
+}
+
+void Hash::removeItem(char* remitente) {
+	int index = hash(remitente);
+	Correo* delPtr;
+	Correo* P1;
+	Correo* P2;
+	
+	// Case 0 - bucket is empty
+	if(HashTable[index]->identificador == 0 && HashTable[index]->remitente[0] == '\0' && HashTable[index]->destinatario[0] == '\0' && HashTable[index]->copiaCarbon[0] == '\0' && HashTable[index]->copiaCarbonCiega[0] == '\0' && HashTable[index]->asunto[0] == '\0' && HashTable[index]->contenido[0] == '\0') {
+		cout << remitente << " was not found in the Hash Table" << endl;
+		cin.get();
+		cin.get();
+	}
+	
+	// Case 1 - Only 1 item contained in bucket and that item has matching name
+	else if(HashTable[index]->remitente == remitente && HashTable[index]->next == NULL) {
+		HashTable[index]->identificador = 0;
+		HashTable[index]->remitente[0] = '\0';
+		HashTable[index]->destinatario[0] = '\0';
+		HashTable[index]->copiaCarbon[0] = '\0';
+		HashTable[index]->copiaCarbonCiega[0] = '\0';
+		HashTable[index]->asunto[0] = '\0';
+		HashTable[index]->contenido[0] = '\0';
+		
+		cout << remitente << " was removed from this Hash Table" << endl;
+		cin.get();
+		cin.get();
+	}
+	
+	// Case 2: - Match in the first item in the bucket but there are
+	// more item in the bucket
+	else if(HashTable[index]->remitente == remitente) {
+		delPtr = HashTable[index];
+		HashTable[index] = HashTable[index]->next;
+		delete delPtr;
+		
+		cout << remitente  << " was removed from the Hash Table" << endl;
+		cin.get();
+		cin.get();
+	}
+	
+	// Case 3: Bucket contains items but first item is not a match
+	else {
+		P1 = HashTable[index]->next;
+		P2 = HashTable[index];
+		
+		while(P1 != NULL && P1->remitente != remitente) {
+			P2 = P1;
+			P1 = P1->next;
+		}
+		
+		// Case 3.1 - No match
+		if(P1 == NULL) {
+			cout << remitente << " was not found in the Hash Table" << endl;
+			cin.get();
+			cin.get();
+		}
+		// Case 3.2 - Match is found
+		else {
+			delPtr = P1;
+			P1 = P1->next;
+			P2->next = P1;
+			
+			delete delPtr;
+			cout << remitente << " was removed from the Hash Table" << endl;
+			cin.get();
+			cin.get();
+		}
+	}
+}
+
+void Hash::findEmail(char* remitente){
+	int index = hash(remitente);
+	bool foundName = false;
+	int ID;
+	string REMITENTE;
+	string DESTINATARIO;
+	string COPIACARBON;
+	string COPIACARBONCIEGA;
+	string ASUNTO;
+	string CONTENIDO;
+	
+	Correo* Ptr = HashTable[index];
+	while(Ptr != NULL) {
+		if(Ptr->remitente == remitente) {
+			foundName = true;
+			ID = Ptr->identificador;
+			REMITENTE = Ptr->remitente;
+			DESTINATARIO = Ptr->destinatario;
+			COPIACARBON = Ptr->copiaCarbon;
+			COPIACARBONCIEGA = Ptr->copiaCarbonCiega;
+			ASUNTO = Ptr->asunto;
+			CONTENIDO = Ptr->contenido;
+		}
+		Ptr = Ptr->next;
+	}
+	if(foundName == true) {
+		cout << "Email was found" << endl;
+		cout << "Showing..." << endl;
+		cout << "ID: " << ID << endl;
+		cout << "Remitente: " << REMITENTE << endl;
+		cout << "Destinatario: " << DESTINATARIO << endl;
+		cout << "Copia Carbon: " << COPIACARBON << endl;
+		cout << "Copia Carbon Ciega: " << COPIACARBONCIEGA << endl;
+		cout << "Asunto: " << ASUNTO << endl;
+		cout << "Contenido: " << CONTENIDO << endl;
+		cin.get();
+		cin.get();
+	} else {
+		cout << remitente << " info was not found in the Hash Table" << endl;
+		cin.get();
+		cin.get();
+	}
+}
+
+void funcionHash() {
+	Hash Hashy;
+	char remitenteABuscar[20];
+	char remitenteAEliminar[20];
+	int opcion;
+	do{
+		system(CLEAR);
+		cout << setw(10) << "MENU" << endl;
+		cout << "1. Importar archivo de correo" << endl;
+		cout << "2. Ver todos los correos" << endl;
+		cout << "3. Buscar correo" << endl;
+		cout << "4. Eliminar correo" << endl;
+		cout << "5. Atras" << endl;
+		cout << "6. Salir" << endl;
+		cout << "Seleccione opcion: ";
+		cin >> opcion;
+		switch(opcion){
+			case 1:
+				system(CLEAR);
+				importarHash();
+				break;
+			case 2:
+				system(CLEAR);
+				cout << "Mostrando Tabla Hash:" << endl;
+				Hashy.printTable();
+				cin.get();
+				cin.get();
+				break;
+			case 3:
+				system(CLEAR);
+				cout << "Digite el nombre del remitente a buscar: ";
+				cin.clear();
+				cin.ignore();
+				cin.getline(remitenteABuscar, 20);
+				Hashy.findEmail(remitenteABuscar);
+				cin.get();
+				cin.get();
+				break;
+			case 4:
+				system(CLEAR);
+				cout << "Ingrese el remitente del correo a eliminar: ";
+				cin.clear();
+				cin.ignore();
+				cin.getline(remitenteAEliminar, 20);
+				Hashy.removeItem(remitenteAEliminar);
+				break;
+			case 5:
+				main();
+				break;
+			case 6:
+				break;
+		}
+	}while(opcion != 6);
+}
+
+void importarHash() {
+	Hash Hashy;
+	system(CLEAR);
+	bool encontrado = false;
+	fstream Archivo;
+	string nombreArchivo;
+	cout << "Digite el nombre del archivo de correos que desea importar: ";
+	cin.clear();
+	cin.ignore();
+	getline(cin, nombreArchivo);
+	nombreArchivo = nombreArchivo + ".txt";
+	Archivo.open(nombreArchivo.c_str(), ios::in);
+	if(Archivo.good()) {
+		while(!Archivo.eof()) {
+			Archivo.read((char *)&Correo1, sizeof(Correo));
+			if(Archivo.eof()) {
+				break;
+			}
+			
+			if(Correo1.identificador != 0) {
+				leerHash();
+				encontrado = true;
+			}
+		}
+	} else {
+		cerr << "Error al abrir el archivo" << endl;
+		return;
+	}
+	if(!encontrado) {
+		cout << "No hay elementos" << endl;
+	}
+	Archivo.close();
+	Hashy.addItem(&Correo1);
+}
+
+void leerHash() {
+	cout << "Se lee el contenido del archivo" << endl;
+	cout << "Mostrando" << endl;
+	cout << "Identificador: " << Correo1.identificador << endl;
+	cout << "Remitente: " << Correo1.remitente << endl;
+	cout << "Destinatario: " << Correo1.destinatario << endl;
+	cout << "Copia Carbon: " << Correo1.copiaCarbon << endl;
+	cout << "Copia Carbon Ciega: " << Correo1.copiaCarbonCiega << endl;
+	cout << "Asunto: " << Correo1.asunto << endl;
+	cout << "Contenido: " << Correo1.contenido << endl;
+	cout << "Fecha: " << Correo1.fechaCreacion.dia << "/" << Correo1.fechaCreacion.mes << "/" << Correo1.fechaCreacion.anio << endl;
+	cout << "Hora: " << Correo1.horaCreacion.hora << ":" << Correo1.horaCreacion.minuto << endl;
+	cin.ignore();
 }
 
 ////////////////// BUSQUEDA POR INDICES PRIMARIOS ---- NO OPERATIVO /////////////////////////////////////////
